@@ -1,0 +1,24 @@
+atomfm-list {
+  display: block;
+}
+
+atomfm-item {
+  display: block;
+  cursor: pointer;
+}
+
+atomfm-item.selected {
+  background-color: lightgrey;
+}
+
+atomfm-item.active {
+  border: 1px dashed grey;
+}
+
+atomfm-item[type=directory]:before {
+  content: '/';
+}
+
+atomfm-item:hover {
+  background-color: lightgrey;
+}

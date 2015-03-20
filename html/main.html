@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Atom File Manager</title>
+    <link rel="stylesheet" href="default_style.css">
+    <script>
+      (function() {
+        var querystring = require("querystring");
+        var parsedSearch = querystring.parse(location.search.substr(1));
+        if(parsedSearch.home) {
+          var userStylesheetEl = document.createElement("link");
+          userStylesheetEl.rel = "stylesheet";
+          userStylesheetEl.href = "file://" + parsedSearch.home + "/.atomfm/style.css";
+
+          document.head.appendChild(userStylesheetEl);
+        }
+      }());
+    </script>
+    <script src="atomfm.js"></script>
+  </head>
+  <body>
+    <atomfm-frame>
+      <atomfm-title></atomfm-title>
+      <atomfm-tree>
+      </atomfm-tree>
+      <atomfm-list>
+
+      </atomfm-list>
+    </atomfm-frame>
+    <script>
+
+      function objToString(obj) {
+        var objStr = "";
+        for(var name in obj) {
+          objStr += name +": " + obj[name] + "\n";
+        }
+        return objStr;
+      }
+
+      window.addEventListener("keydown", function(e){
+        if((e.which == 115 && e.altKey)
+        || (e.which == 85 && e.ctrlKey)) {
+          window.close();
+        }
+
+      });
+    </script>
+  </body>
+</html>
