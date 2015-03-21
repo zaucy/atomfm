@@ -1,24 +1,40 @@
+* {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
 atomfm-list {
   display: block;
 }
 
 atomfm-item {
   display: block;
-  cursor: pointer;
+  cursor: default;
 }
 
 atomfm-item.selected {
   background-color: lightgrey;
+  outline: 1px solid grey;
+}
+
+atomfm-item.active.selected {
+  background-color: lightgrey;
 }
 
 atomfm-item.active {
-  border: 1px dashed grey;
+  outline: 1px dashed grey;
+  background-color: transparent;
 }
 
-atomfm-item[type=directory]:before {
+atomfm-item[name^="."] {
+  opacity: 0.5;
+}
+
+atomfm-item[type=directory]:after {
   content: '/';
 }
 
 atomfm-item:hover {
-  background-color: lightgrey;
+  background-color: rgba(32, 32, 32, 0.1);
+  outline: 1px solid rgba(32, 32, 32, 0.2);
 }

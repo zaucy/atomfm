@@ -1,0 +1,29 @@
+{
+  "name": "atomfm",
+  "version": "0.0.1",
+  "description": "Atom File Manager",
+  "main": "main.js",
+  "dependencies": {
+    "nodejs-disks": "git://github.com/zaucy/nodejs-disks.git"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/zaucy/atomfm.git"
+  },
+  "keywords": [
+    "Atom",
+    "File",
+    "Manager",
+    "atomfm"
+  ],
+  "author": "Ezekiel Warren",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/zaucy/atomfm/issues"
+  },
+  "homepage": "https://github.com/zaucy/atomfm"
+}
