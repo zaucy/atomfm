@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "description": "Atom File Manager",
   "main": "main.js",
+	"bin": "./bin/atomfm",
   "dependencies": {
     "nodejs-disks": "git://github.com/zaucy/nodejs-disks.git"
   },
