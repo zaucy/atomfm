@@ -13,7 +13,9 @@ app.on("window-all-closed", function() {
 });
 
 app.on("ready", function() {
-  var window = new BrowserWindow;
+  var window = new BrowserWindow({
+    
+  });
 
   window.loadUrl("file://" + __dirname + "/html/main.html?home=" + getUserHomePath());
   window.toggleDevTools();
