@@ -37,6 +37,10 @@
           process.chdir(item.textContent + "\\");
           loadDirectory();
           break;
+        default:
+          process.chdir(item.getAttribute("mountpoint"));
+          loadDirectory();
+          break;
       }
     }
   };
@@ -328,6 +332,7 @@
             var driveEl = document.createElement("atomfm-item");
             driveEl.type = "drive";
             driveEl.textContent = driveDetail.drive;
+            driveEl.setAttribute("mountpoint", driveDetail.mountpoint);
 
             activeListEl.appendChild(driveEl);
           }
