@@ -10,6 +10,8 @@
   var activeItemIndex = 0;
   var activeListEl = null;
 
+  var pathHistory = [];
+
   var openItem = function(item) {
     if(!item) return;
     if(item.type == "directory") {
@@ -206,8 +208,10 @@
   };
 
   window.addEventListener("popstate", function(e) {
-    process.chdir(e.state);
-    loadDirectory(e.state);
+    if(e.state) {
+      process.chdir(e.state);
+      loadDirectory(e.state, false);
+    }
   });
 
   window.addEventListener("click", function(e) {
@@ -271,7 +275,29 @@
       }
 
       e.preventDefault();
+    } else
+    // Right Arrow
+    if(e.which == 39) {
+      if(e.altKey) {
+        history.forward();
+      }
+    } else
+    // Left Arrow
+    if(e.which == 37) {
+      if(e.altKey) {
+        history.back();
+      }
+    } else
+    // Backspace
+    if(e.which == 8) {
+      if(e.shiftKey) {
+        history.forward();
+      } else {
+        history.back();
+      }
+
     }
+
   });
 
   var AtomFileManagerListElement = document.registerElement("atomfm-list");
@@ -281,15 +307,16 @@
 
   exports.AtomFileManagerListElement = AtomFileManagerListElement;
 
-  function loadDirectory(dir) {
+  function loadDirectory(dir, affectHistory) {
     if(!activeListEl) return;
     var dir = dir || process.cwd();
 
     activeItemIndex = 0;
     activeItem = null;
     activeListEl.innerHTML = "";
-    history.pushState(dir, "", dir);
-
+    if(affectHistory !== false) {
+      history.pushState(dir, "", dir);
+    }
     fs.readdir(dir, function(err, paths) {
       paths.unshift("..");
       for(var i=0; paths.length > i; i++) {
