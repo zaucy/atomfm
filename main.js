@@ -9,12 +9,11 @@ function getUserHomePath() {
 
 app.on("window-all-closed", function() {
   app.quit();
-  process.exit(0);
 });
 
 app.on("ready", function() {
   var window = new BrowserWindow({
-    
+
   });
 
   window.loadUrl("file://" + __dirname + "/html/main.html?home=" + getUserHomePath());
@@ -26,6 +25,6 @@ app.on("ready", function() {
   });
 
   window.webContents.on("did-finish-load", function() {
-
+    
   });
 });
