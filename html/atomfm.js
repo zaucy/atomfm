@@ -73,6 +73,7 @@
       if(activeItem) activeItem.classList.remove("active");
       activeItem = el;
       activeItem.classList.add("active");
+      activeItem.focus();
 
       var i=0;
       var c = activeListEl.firstElementChild;
@@ -218,6 +219,7 @@
   });
 
   window.addEventListener("keydown", function(e) {
+
     // Escape key
     if(e.which == 27) {
       if(activeItem) {
@@ -229,14 +231,42 @@
     // Return key
     if(e.which == 13) {
       if(selectedItems.length > 1) {
-        openItem(activeItem);
+        openItem(activeItem || activeListEl.firstElementChild);
       } else {
-        openItem(selectedItems[0]);
+        openItem(selectedItems[0] || activeListEl.firstElementChild);
       }
     } else
     // F5 key
     if(e.which == 116) {
       loadDirectory();
+    } else
+    // Up Arrow
+    if(e.which == 38) {
+      if(!e.shiftKey && !e.ctrlKey) deselectAll();
+      if(activeItemIndex > 0) {
+        setActiveItem(activeListEl.children[activeItemIndex -1]);
+      } else
+      if(activeItemIndex == 0) {
+        setActiveItem(activeListEl.children[activeItemIndex]);
+      }
+      if(!e.ctrlKey) {
+        selectItem(activeItem);
+      }
+
+      e.preventDefault();
+
+    } else
+    // Down Arrow
+    if(e.which == 40) {
+      if(!e.shiftKey && !e.ctrlKey) deselectAll();
+      if(activeItemIndex + 1 < activeListEl.children.length) {
+        setActiveItem(activeListEl.children[activeItemIndex + 1]);
+      }
+      if(!e.ctrlKey) {
+        selectItem(activeItem);
+      }
+
+      e.preventDefault();
     }
   });
 
@@ -251,6 +281,8 @@
     if(!activeListEl) return;
     var dir = dir || process.cwd();
 
+    activeItemIndex = 0;
+    activeItem = null;
     activeListEl.innerHTML = "";
     history.pushState(dir, "", dir);
 
