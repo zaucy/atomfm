@@ -26,12 +26,19 @@
         loadDirectory();
     } else
     if(item.type == "file") {
-      var child = child_process.spawn("start \"" + process.cwd() + "/" + item.textContent + "\"", [], {
-        detached: true,
-        stdio: [ 'ignore' ]
-      });
+      switch(os.platform().toLowerCase()) {
 
-      child.unref();
+        case "linux":
+          // Linux handles opening files differently. It's defined by
+          // the window managers / desktop environments / whatever they
+          // choose to run their software from... 
+          //break;
+        case "win32":
+        default:
+          var child = child_process.exec(item.textContent);
+          child.unref();
+          break;
+      }
     } else
     if(item.type == "drive") {
       switch(os.platform().toLowerCase()) {
