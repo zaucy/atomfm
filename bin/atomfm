@@ -1,2 +1,2 @@
-#!/usr/bin/env atom-shell
+#!/usr/bin/env electron
 require(__dirname + "/../main.js");
