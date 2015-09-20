@@ -161,7 +161,17 @@
 
   var clearSearch = function() {
     currentSearchString = "";
-    updateSearch();
+    var searchedTextEls = document.querySelectorAll("atomfm-item > .searched-text");
+    for(let i=0; searchedTextEls.length > i; i++) {
+      const searchedTextEl = searchedTextEls[i];
+      const parent = searchedTextEl.parentElement;
+      const searchedText = searchedTextEl.textContent;
+      searchedTextEl.remove();
+
+      if(searchedText.length > 0) {
+        parent.insertBefore(document.createTextNode(searchedText), parent.firstChild);
+      }
+    }
   };
 
   var AtomFileManagerItemElementPrototype = Object.create(HTMLElement.prototype);
