@@ -1,3 +1,5 @@
+"use strict";
+
 (function(exports) {
   var fs = require("fs");
   var os = require("os");
@@ -12,6 +14,8 @@
 
   var pathHistory = [];
 
+  var currentSearchString = "";
+
   var openItem = function(item) {
     if(!item) return;
     if(item.type == "directory") {
@@ -23,6 +27,7 @@
           }
         }
         process.chdir(process.cwd() + "/" + item.textContent);
+        clearSearch();
         loadDirectory();
     } else
     if(item.type == "file") {
@@ -31,7 +36,7 @@
         case "linux":
           // Linux handles opening files differently. It's defined by
           // the window managers / desktop environments / whatever they
-          // choose to run their software from... 
+          // choose to run their software from...
           //break;
         case "win32":
         default:
@@ -62,6 +67,16 @@
     selectedItems = [];
   };
 
+  var deselectAllExcept = function(inExceptions) {
+    let exceptions = Array.isArray(inExceptions) ? inExceptions : arguments;
+
+    deselectAll();
+    for(let i=0; exceptions.length > i; i++) {
+      const item = exceptions[i];
+      selectItem(item);
+    }
+  };
+
   var selectItem = function(item) {
     if(!item) return;
     selectedItems.push(item);
@@ -82,11 +97,18 @@
   };
 
   var setActiveItem = function(el) {
+    if(el === null) {
+      if(activeItem) {
+        activeItem.classList.remove("active");
+        activeItem = null;
+      }
+    } else
     if(el.parentElement == activeListEl) {
       if(activeItem) activeItem.classList.remove("active");
       activeItem = el;
       activeItem.classList.add("active");
       activeItem.focus();
+      activeItem.scrollIntoViewIfNeeded();
 
       var i=0;
       var c = activeListEl.firstElementChild;
@@ -98,6 +120,48 @@
 
       activeItemIndex = i;
     }
+  };
+
+  var updateSearch = function() {
+    var items = document.querySelectorAll("atomfm-item");
+
+    document.querySelector("#atomfm-search-bar").textContent = currentSearchString;
+
+    let selit = null;
+    let numItemsFound = 0;
+
+    deselectAll();
+
+    for(let i=0; items.length > i; i++) {
+      let item = items[i];
+      const itemText = item.textContent.trim();
+      if(itemText.startsWith(currentSearchString)) {
+        numItemsFound += 1;
+        if(selit === null) {
+          selit = item;
+          selectItem(selit);
+          setActiveItem(selit);
+        }
+        item.innerHTML = "";
+        let hlEl = document.createElement("span");
+        hlEl.classList.add("searched-text");
+        hlEl.textContent = currentSearchString;
+        item.appendChild(hlEl);
+        item.appendChild(document.createTextNode(itemText.substr(currentSearchString.length)));
+      } else {
+        item.innerHTML = item.textContent;
+      }
+    }
+
+    if(numItemsFound == 0) {
+
+    }
+
+  };
+
+  var clearSearch = function() {
+    currentSearchString = "";
+    updateSearch();
   };
 
   var AtomFileManagerItemElementPrototype = Object.create(HTMLElement.prototype);
@@ -212,6 +276,11 @@
     this.addEventListener("dblclick", function(e) {
       openItem(this);
     });
+
+    this.addEventListener("focus", function(e) {
+      this.scrollIntoView();
+      console.log(e);
+    });
   };
 
   window.addEventListener("popstate", function(e) {
@@ -237,6 +306,9 @@
 
     // Escape key
     if(e.which == 27) {
+      setActiveItem(null);
+      clearSearch();
+
       if(activeItem) {
         activeItem.classList.remove("active");
         activeItem = null;
@@ -297,14 +369,19 @@
     } else
     // Backspace
     if(e.which == 8) {
-      if(e.shiftKey) {
-        history.forward();
-      } else {
-        history.back();
+      if(currentSearchString.length > 0) {
+        currentSearchString = currentSearchString.substr(0, currentSearchString.length-1);
+        updateSearch();
       }
-
     }
 
+  });
+
+  window.addEventListener("keypress", function(e) {
+    if(e.ctrlKey || e.altKey) return;
+
+    currentSearchString += String.fromCharCode(e.charCode);
+    updateSearch();
   });
 
   var AtomFileManagerListElement = document.registerElement("atomfm-list");
@@ -349,6 +426,8 @@
             pathEl.setAttribute("type", pathType);
           });
         }());
+
+        clearSearch();
       }
     });
   }

@@ -12,6 +12,10 @@ atomfm-item {
   cursor: default;
 }
 
+atomfm-item .searched-text {
+  color: red;
+}
+
 atomfm-item.selected {
   background-color: lightgrey;
   outline: 1px solid grey;
@@ -26,10 +30,6 @@ atomfm-item.active {
   background-color: transparent;
 }
 
-atomfm-item[name^="."] {
-  opacity: 0.5;
-}
-
 atomfm-item[type=directory]:after {
   content: '/';
 }
@@ -37,4 +37,12 @@ atomfm-item[type=directory]:after {
 atomfm-item:hover {
   background-color: rgba(32, 32, 32, 0.1);
   outline: 1px solid rgba(32, 32, 32, 0.2);
+}
+
+#atomfm-search-bar {
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  white-space: pre;
+  font-family: monospace;
 }
