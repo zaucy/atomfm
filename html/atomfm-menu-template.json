@@ -1,0 +1,21 @@
+[
+  {
+    "label": "File",
+    "submenu": [
+      {
+        "label": "Options",
+        "accelerator": "CmdOrCtrl+,",
+        "click": "openOptions"
+      },
+      {
+        "label": "Goto Your Config",
+        "click": "gotoConfig"
+      },
+      {
+        "label": "Close",
+        "accelerator": "CmdOrCtrl+W",
+        "role": "close"
+      }
+    ]
+  }
+]

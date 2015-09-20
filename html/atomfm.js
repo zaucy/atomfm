@@ -6,6 +6,7 @@
   var path = require("path");
   var child_process = require("child_process");
   var njds = require("nodejs-disks");
+  var querystring = require("querystring");
 
   var selectedItems = [];
   var activeItem = null;
@@ -15,6 +16,105 @@
   var pathHistory = [];
 
   var currentSearchString = "";
+
+  const styleUpdaters = {
+    css(linkEl, pathname, done) {
+      linkEl.href = "file://" + pathname;
+      done();
+    },
+
+    less(linkEl, pathname, done) {
+      const less = require("less");
+      const dirname = path.dirname(pathname);
+      const basename = path.basename(pathname);
+      const data = fs.readFile(pathname, function(err, data) {
+        if(err) throw err;
+
+        less.render(data.toString(), {
+          paths: ['.']
+        }, function(err, output) {
+          if(err) console.log(err);
+
+          const compiledPath = `${dirname}/_${basename}.css`;
+          fs.writeFile(compiledPath, output.css, function() {
+            linkEl.href = `file://${compiledPath}`;
+            done();
+          });
+        });
+      });
+    },
+
+    sass(linkEl, pathname, done) {
+
+    },
+
+    styl(linkEl, pathname, done) {
+      const stylus = require("stylus");
+      const dirname = path.dirname(pathname);
+      const basename = path.basename(pathname);
+      const data = fs.readFile(pathname, function(err, data) {
+        stylus.render(data.toString(), {
+          paths: ['.']
+        }, function(err, css) {
+          if(err) console.log(err);
+
+          const compiledPath = `${dirname}/_${basename}.css`;
+          fs.writeFile(compiledPath, css, function() {
+            linkEl.href = `file://${compiledPath}`;
+            done();
+          });
+        });
+
+      });
+    }
+  };
+
+  var styleEls = {
+    css: null,
+    less: null,
+    sass: null,
+    styl: null
+  };
+
+  var parsedSearch = querystring.parse(location.search.substr(1));
+  var configDir = parsedSearch.home + "/.atomfm";
+  if(parsedSearch.home) {
+    let files = fs.readdirSync(configDir);
+    for(let i=0; files.length > i; i++) {
+      let file = files[i];
+      updateStyle(file);
+    }
+
+    fs.watch(configDir, function(e, filename) {
+      updateStyle(filename);
+    });
+  }
+
+  function updateStyle(name) {
+    let ext = name.substr(name.lastIndexOf(".")+1);
+    switch(name) {
+      case "style.css":
+      case "style.less":
+      case "style.sass":
+      case "style.styl":
+        let styleElId = `${ext}-style`;
+        let styleEl = styleEls[ext];
+        if(styleEl === null) {
+          styleEl = document.createElement("link");
+          styleEl.rel = "stylesheet";
+          styleEl.type= "text/css";
+          styleEl.id = styleElId;
+          styleEls[ext] = styleEl;
+        }
+
+        styleEl.remove();
+        styleUpdaters[ext](styleEl, `${configDir}/${name}`, function() {
+          document.head.appendChild(styleEl);
+        });
+
+        break;
+    }
+  }
 
   var openItem = function(item) {
     if(!item) return;
@@ -413,29 +513,51 @@
     }
     fs.readdir(dir, function(err, paths) {
       paths.unshift("..");
-      for(var i=0; paths.length > i; i++) {
+      for(let i=0; paths.length > i; i++) {
 
-        (function() {
-          var filePath = paths[i];
-          var pathEl = document.createElement("atomfm-item");
-          pathEl.textContent = filePath;
-          pathEl.path = dir + "/" + filePath;
-          activeListEl.appendChild(pathEl);
-          fs.stat(filePath, function(err, stats) {
-            if(err) {
-              return;
+        let filePath = paths[i];
+        let pathEl = document.createElement("atomfm-item");
+        pathEl.textContent = filePath;
+        pathEl.path = dir + "/" + filePath;
+        activeListEl.appendChild(pathEl);
+        fs.stat(filePath, function(err, stats) {
+          if(err) {
+            return;
+          }
+          let pathType = "unknown";
+          if(stats.isFile()) pathType = "file";
+          else if(stats.isDirectory()) pathType = "directory";
+          else if(stats.isBlockDevice()) pathType = "block-device";
+          else if(stats.isCharacterDevice()) pathType = "character-device";
+          else if(stats.isSymbolicLink()) pathType = "symbolic-link";
+          else if(stats.isFIFO()) pathType = "fifo";
+          else if(stats.isSocket()) pathType = "socket";
+          pathEl.setAttribute("type", pathType);
+
+
+          let isHidden = false;
+
+          if(process.platform == "win32") {
+            //const fswin = require("fswin");
+            //isHidden = fswin.getAttributeSync(filePath, "IS_HIDDEN");
+          } else
+          if(process.platform == "linux") {
+            isHidden = pathEl.startsWith(".");
+          } else
+          if(process.platform == "darwin") {
+            // ??
+          }
+
+          if(isHidden) {
+            pathEl.setAttribute("is_hidden", "");
+          }
+
+          if(pathEl.type == "directory") {
+            while(pathEl.previousElementSibling && pathEl.previousElementSibling.type != "directory") {
+              pathEl.parentElement.insertBefore(pathEl, pathEl.previousElementSibling);
             }
-            var pathType = "unknown";
-            if(stats.isFile()) pathType = "file";
-            else if(stats.isDirectory()) pathType = "directory";
-            else if(stats.isBlockDevice()) pathType = "block-device";
-            else if(stats.isCharacterDevice()) pathType = "character-device";
-            else if(stats.isSymbolicLink()) pathType = "symbolic-link";
-            else if(stats.isFIFO()) pathType = "fifo";
-            else if(stats.isSocket()) pathType = "socket";
-            pathEl.setAttribute("type", pathType);
-          });
-        }());
+          }
+        });
 
         clearSearch();
       }
@@ -471,5 +593,50 @@
       loadDirectory(process.cwd());
     }
   });
+
+  var atomfm = {
+    openOptions() {
+
+    },
+
+    gotoConfig() {
+      if(parsedSearch.home) {
+        let pathname = `${parsedSearch.home}/.atomfm`;
+        try {
+          process.chdir(pathname);
+        } catch(err) {
+          console.log(err);
+          fs.mkdirSync(pathname);
+          process.chdir(pathname);
+        }
+        loadDirectory();
+      }
+    }
+  };
+
+  var remote = require("remote");
+  var Menu = remote.require("menu");
+
+  var template = JSON.parse(fs.readFileSync(__dirname + "/atomfm-menu-template.json"));
+
+  for(let i=0; template.length > i; i++) {
+    let templateItem = template[i];
+    if(templateItem.click) {
+      templateItem.click = atomfm[templateItem.click];
+    }
+
+    if(templateItem.submenu) {
+      for(let n=0; templateItem.submenu.length > n; n++) {
+        let templateItemSubmenuItem = templateItem.submenu[n];
+        if(templateItemSubmenuItem.click) {
+          templateItemSubmenuItem.click = atomfm[templateItemSubmenuItem.click];
+        }
+      }
+    }
+  }
+
+  Menu.setApplicationMenu(Menu.buildFromTemplate(template));
+
+  window.atomfm = atomfm;
 
 }(window));

@@ -3,27 +3,6 @@
   <head>
     <title>Atom File Manager</title>
     <link rel="stylesheet" href="default_style.css">
-    <script>
-      (function() {
-        var fs = require("fs");
-        var querystring = require("querystring");
-        var parsedSearch = querystring.parse(location.search.substr(1));
-        if(parsedSearch.home) {
-          var userStylesheetEl = document.createElement("link");
-          userStylesheetEl.rel = "stylesheet";
-          userStylesheetEl.href = "file://" + parsedSearch.home + "/.atomfm/style.css?t=0";
-
-          document.head.appendChild(userStylesheetEl);
-
-          fs.watch(parsedSearch.home + "/.atomfm", function(e, filename) {
-            if(filename == "style.css" && e == "change") {
-              userStylesheetEl.remove();
-              document.head.appendChild(userStylesheetEl);
-            }
-          });
-        }
-      }());
-    </script>
     <script src="atomfm.js"></script>
   </head>
   <body>
