@@ -46,3 +46,27 @@ atomfm-item:hover {
   white-space: pre;
   font-family: monospace;
 }
+
+fm-path {
+  border-bottom: 1px solid grey;
+  display: block;
+  padding: 4px;
+}
+
+fm-path > fm-item {
+  cursor: pointer;
+  padding: 4px;
+}
+
+fm-path > fm-item:hover {
+  background-color: rgba(32, 32, 32, 0.1);
+}
+
+atomfm-path-item:last-child:after {
+  content: "";
+}
+
+fm-path > fm-item:after {
+  content: "/";
+  background-color: transparent;
+}

@@ -2,28 +2,19 @@
 <html>
   <head>
     <title>Atom File Manager</title>
-    <link rel="stylesheet" href="default_style.css">
+    <link rel="stylesheet" href="default-style.css">
     <script src="atomfm.js"></script>
+    <script>require("./dom/fm.js")</script>
+    <script>require("./dom/user-stylesheet.js")</script>
   </head>
   <body>
-    <atomfm-frame>
-      <atomfm-title></atomfm-title>
-      <atomfm-tree>
-      </atomfm-tree>
-      <atomfm-list>
-
-      </atomfm-list>
-    </atomfm-frame>
+    <fm-frame>
+      <fm-path></fm-path>
+      <atomfm-list></atomfm-list>
+    </fm-frame>
     <div id="atomfm-search-bar"></div>
     <script>
       "use strict";
-      function objToString(obj) {
-        var objStr = "";
-        for(var name in obj) {
-          objStr += name +": " + obj[name] + "\n";
-        }
-        return objStr;
-      }
 
       window.addEventListener("keydown", function(e){
         if((e.which == 115 && e.altKey)
